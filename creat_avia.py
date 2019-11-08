@@ -40,21 +40,21 @@ origin_list = ['KRK', 'IEV', 'MOW', 'LED', 'PRG']
 
 
 # Taking token, interesting cities list and time list. And work with this.
-def avia_tickets(cities_l, time_l, token):
+def avia_tickets(origin, cities_l, time_l, token):
     result = []
     # Open interesting cities list
     for citi in cities_l:
         # Time list for choosed city
         for time in time_l:
             # Taking request for choosed city in choosed month
-            res = request_avia(citi, time, token)
+            res = request_avia(origin, citi, time, token)
             if len(res['data']) > 0:
                 result.append(res)
     return result
 
 
 # Request from travelpayouts API
-def request_avia(citi, time, token):
+def request_avia(origin, citi, time, token):
     url = "https://api.travelpayouts.com/v1/prices/calendar"
 
     querystring = {"depart_date": time, "origin": origin, "destination": citi, "calendar_type": "departure_date",
@@ -108,7 +108,7 @@ def job(origin, interesting_cities):
                 time_list.append(st)
             month += 1
 
-        json_avia = avia_tickets(interesting_cities, time_list, token)
+        json_avia = avia_tickets(origin, interesting_cities, time_list, token)
 
         list_avia = from_json(json_avia)
 
