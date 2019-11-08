@@ -2,7 +2,7 @@ import pymongo
 import keys
 
 client = pymongo.MongoClient(
-    "mongodb+srv://" + keys.mongodb_user + "@botcluster-j6nsa.mongodb.net/test?retryWrites=true&w=majority")
+    "mongodb+srv://" + keys.mongodb_user + "-j6nsa.mongodb.net/test?retryWrites=true&w=majority")
 db = client['Bot']
 coll = db['user_id']
 
