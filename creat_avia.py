@@ -39,21 +39,26 @@ interesting_cities_list = {'KRK': interesting_cities_krk, 'IEV': interesting_cit
 origin_list = ['KRK', 'IEV', 'MOW', 'LED', 'PRG']
 
 
+# Taking token, interesting cities list and time list. And work with this.
 def avia_tickets(cities_l, time_l, token):
     result = []
+    # Open interesting cities list
     for citi in cities_l:
+        # Time list for choosed city
         for time in time_l:
+            # Taking request for choosed city in choosed month
             res = request_avia(citi, time, token)
             if len(res['data']) > 0:
                 result.append(res)
     return result
 
 
+# Request from travelpayouts API
 def request_avia(citi, time, token):
     url = "https://api.travelpayouts.com/v1/prices/calendar"
 
-    querystring = {"depart_date": time, "origin": origin, "destination": citi,  # 'length':'3',
-                   "calendar_type": "departure_date", "currency": "USD"}
+    querystring = {"depart_date": time, "origin": origin, "destination": citi, "calendar_type": "departure_date",
+                   "currency": "USD"}
 
     headers = {'x-access-token': token}
 
@@ -61,6 +66,7 @@ def request_avia(citi, time, token):
     return response.json()
 
 
+# From json to list
 def from_json(lst):
     names = ['origin', 'destination', 'price', 'transfers', 'airline', 'flight_number', 'departure_at',
              'return_at', 'expires_at']
@@ -77,14 +83,18 @@ def from_json(lst):
     return result
 
 
+# Main function
 def job(origin, interesting_cities):
     token = keys.avia_token
     logging.info(u'The work is starting')
+
     try:
         time_list = []
         time = datetime.datetime.now()
         year = time.year
         month = time.month
+
+        # Creating month list.
         for i in range(0, 6):
             if month > 12:
                 year += 1
@@ -102,28 +112,34 @@ def job(origin, interesting_cities):
 
         list_avia = from_json(json_avia)
 
+        # Create main dataframe
         df = pd.DataFrame(list_avia,
                           columns=['data', 'origin', 'destinaton', 'price', 'transfers', 'airline', 'flight_number',
                                    'departure_at', 'return_at', 'expires_at'])
 
         airline_code = pd.read_csv('airlines_codes.csv')
 
+        # Adding full name of airline
         df = df.merge(airline_code, left_on='airline', right_on='code', how='right')
         df.dropna(inplace=True)
 
         city_code = pd.read_csv('cties_code.csv')
 
+        # Adding full name of origin city
         df = df.merge(city_code, left_on='origin', right_on='citi code', how='right')
         del df['citi code']
         df.rename(columns={'citi name': 'origin citi'}, inplace=True)
         df.dropna(inplace=True)
 
+        # Adding full name of destination city
         df = df.merge(city_code, left_on='destinaton', right_on='citi code', how='right')
         del df['citi code']
         df.rename(columns={'citi name': 'destinaton citi'}, inplace=True)
         df.dropna(inplace=True)
 
         del df['code']
+
+        # Saving results
         save_name = 'avi_result_' + origin + '.csv'
         df.to_csv(save_name, index=False)
         leng = len(df)
@@ -141,7 +157,6 @@ def runer():
 
 
 runer()
-
 schedule.every(4).hours.do(runer)
 
 while True:

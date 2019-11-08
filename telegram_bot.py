@@ -16,7 +16,6 @@ logging.basicConfig(format=u'%(levelname)-8s [%(asctime)s] %(message)s',
 logging.info(u'It`s work')
 
 token = keys.telegram_token
-
 bot = telebot.TeleBot(token)
 
 money = ['money', 'buy', 'tickets', 'bought', 'kupic', 'купить', 'билеты', 'где купить']
@@ -30,8 +29,6 @@ origin_cities = {'kiev': 'Kyiv', 'kyiv': 'Kyiv', 'киев': 'Kyiv', 'київ':
 language_choosed = {'eng': 'Now I speak English', 'ru': 'Теперь я говорою по-русски'}
 
 emoji = ['\U00002708', '\U0001F680', '\U0001F304', '\U0001F307', '\U0001F305', '\U0001F303', '\U0001F3A0', '\U000026F2']
-df_iata = pd.read_csv('cties_code.csv')
-cities = df_iata['citi name'].values
 
 origin_city = 'Krakow'
 iata = {'Kyiv': 'IEV', 'Krakow': 'KRK', 'Moscow': 'MOW', 'Saint Petersburg': 'LED', 'Prague': 'PRG'}
@@ -44,7 +41,7 @@ def start(message):
                      'Write the max price of the tickets in USD by using keyboard or choose one below to find the best offer.\n'
                      + 'To change your language /language\n'
                      + 'To change your city /city',
-                     reply_markup=starting_keybord())
+                     reply_markup=starting_keyboard())
 
 
 @bot.message_handler(commands=['buy'])
@@ -53,10 +50,10 @@ def buy(message):
     lang = data['language']
     if lang == 'eng':
         bot.send_message(message.chat.id, 'You can buy tickets here \nhttp://jetradar.com/?marker=242680',
-                         reply_markup=starting_keybord())
+                         reply_markup=starting_keyboard())
     else:
         bot.send_message(message.chat.id, 'Купить билеты вы можете тут\nhttp://www.aviasales.ru/?marker=242680',
-                         reply_markup=starting_keybord())
+                         reply_markup=starting_keyboard())
 
 
 @bot.message_handler(commands=['help'])
@@ -68,30 +65,33 @@ def help(message):
                          'Type the max price of the tickets in USD by using keyboard or choose one below to find the best offer.\n'
                          + 'To change your language /language\n'
                          + 'To change your city /city',
-                         reply_markup=help_keybord())
+                         reply_markup=help_keyboard())
     else:
         bot.send_message(message.chat.id,
                          'Укажите максимальную цену для билета в USD используя клавиатуру, либо выберите из списка ниже\n'
                          + 'Для смены языка /language\n'
                          + 'Для смены города отправки /city',
-                         reply_markup=help_keybord())
+                         reply_markup=help_keyboard())
 
 
 @bot.message_handler(commands=['status'])
+# Status of creating csv files script
 def status_message(message):
     if message.chat.id == 408454739:
         bot.send_message(message.chat.id, status('mylog.log'))
     else:
         bot.send_message(message.chat.id, 'Sorry you must be an administrator',
-                         reply_markup=starting_keybord())
+                         reply_markup=starting_keyboard())
+
 
 @bot.message_handler(commands=['botstatus'])
-def status_message(message):
+# Bot status
+def bot_status_message(message):
     if message.chat.id == 408454739:
         bot.send_message(message.chat.id, status('botlog.log'))
     else:
         bot.send_message(message.chat.id, 'Sorry you must be an administrator',
-                         reply_markup=starting_keybord())
+                         reply_markup=starting_keyboard())
 
 
 @bot.message_handler(commands=['time'])
@@ -100,11 +100,12 @@ def local_time(message):
         bot.send_message(message.chat.id, datetime.datetime.now())
     else:
         bot.send_message(message.chat.id, 'Sorry you must be an administrator',
-                         reply_markup=starting_keybord())
+                         reply_markup=starting_keyboard())
 
 
 @bot.message_handler(commands=['download'])
-def local_time(message):
+# Download creat_avia logs
+def download(message):
     if message.chat.id == 408454739:
         directory = '/home/ec2-user/'
         document = open(directory + 'mylog.log', 'rb')
@@ -115,10 +116,12 @@ def local_time(message):
         document.close()
     else:
         bot.send_message(message.chat.id, 'Sorry you must be an administrator',
-                         reply_markup=starting_keybord())
+                         reply_markup=starting_keyboard())
+
 
 @bot.message_handler(commands=['botdownload'])
-def local_time(message):
+# Download bot logs
+def bot_download(message):
     if message.chat.id == 408454739:
         directory = '/home/ec2-user/'
         document = open(directory + 'botlog.log', 'rb')
@@ -129,7 +132,7 @@ def local_time(message):
         document.close()
     else:
         bot.send_message(message.chat.id, 'Sorry you must be an administrator',
-                         reply_markup=starting_keybord())
+                         reply_markup=starting_keyboard())
 
 
 @bot.message_handler(commands=['language'])
@@ -138,10 +141,10 @@ def language_changer(message):
     lang = data['language']
     if lang == 'eng':
         bot.send_message(message.chat.id, 'Please choose a language',
-                         reply_markup=language_keybord())
+                         reply_markup=language_keyboard())
     else:
         bot.send_message(message.chat.id, 'Пожалуйста выберите язык',
-                         reply_markup=language_keybord())
+                         reply_markup=language_keyboard())
 
 
 @bot.message_handler(commands=['city'])
@@ -167,10 +170,10 @@ def profile(message):
 
     if lang == 'eng':
         bot.send_message(message.chat.id, 'Language: ' + lang.title() + '\nHometown: ' + origin,
-                         reply_markup=starting_keybord())
+                         reply_markup=starting_keyboard())
     else:
         bot.send_message(message.chat.id, 'Язык: ' + lang.title() + '\nГород отбытия: ' + origin,
-                         reply_markup=starting_keybord())
+                         reply_markup=starting_keyboard())
 
 
 @bot.message_handler(content_types=['text'])
@@ -184,59 +187,62 @@ def handle_text(message):
 
     if text.lower() == 'eng' or text.lower() == 'ru':
         bot.send_message(message.chat.id, language_choosed[text.lower()],
-                         reply_markup=starting_keybord())
+                         reply_markup=starting_keyboard())
         mongodb.lang_updater(message.chat.id, text.lower())
+    # Administrator function
     elif text == '\U00002699':
-        bot.send_message(message.chat.id, 'You must be an administrator to use it', reply_markup=setings_keybord())
+        bot.send_message(message.chat.id, 'You must be an administrator to use it', reply_markup=setings_keyboard())
     elif text.isdigit():
         try:
             bot.send_message(message.chat.id, compare_message(df_tickets[df_tickets['price'] <= int(text)], origin),
-                             reply_markup=starting_keybord())
+                             reply_markup=starting_keyboard())
         except:
             if int(text) < 100:
                 if lang == 'eng':
                     bot.send_message(message.chat.id, "Unfortunately, I don't have such cheap tickets." + u'\U0001F614',
-                                     reply_markup=starting_keybord())
+                                     reply_markup=starting_keyboard())
                 else:
                     bot.send_message(message.chat.id, "Упс, у меня нет таких дешёвых билетов." + u'\U0001F614',
-                                     reply_markup=starting_keybord())
+                                     reply_markup=starting_keyboard())
             else:
                 if lang == 'eng':
                     bot.send_message(message.chat.id,
                                      "Wow, there are too many tickets at this price, so Telegram isn’t useful for it. Maybe try to check some lower prices.",
-                                     reply_markup=starting_keybord())
+                                     reply_markup=starting_keyboard())
                 else:
                     bot.send_message(message.chat.id,
                                      "Ого, слишком много билетов с такой ценой, Telegram будет не очень удобен для использования. Может быть попробуешь цену пониже.",
-                                     reply_markup=starting_keybord())
+                                     reply_markup=starting_keyboard())
+    # If some one want to buy a tickets
     elif money.count(text.lower()) > 0:
         if lang == 'eng':
             bot.send_message(message.chat.id, 'You can buy tickets here \nhttp://jetradar.com/?marker=242680',
-                             reply_markup=starting_keybord())
+                             reply_markup=starting_keyboard())
         else:
             bot.send_message(message.chat.id, 'Купить билеты вы можете тут\nhttp://www.aviasales.ru/?marker=242680',
-                             reply_markup=starting_keybord())
+                             reply_markup=starting_keyboard())
     else:
+        # Try to change origin city
         try:
             if lang == 'eng':
                 mongodb.origin_updater(message.chat.id, origin_cities[text.lower()])
                 bot.send_message(message.chat.id, 'Now your city is ' + origin_cities[text.lower()],
-                                 reply_markup=starting_keybord())
+                                 reply_markup=starting_keyboard())
             else:
                 mongodb.origin_updater(message.chat.id, origin_cities[text.lower()])
                 bot.send_message(message.chat.id, 'Теперь ваш город отправки ' + origin_cities[text.lower()],
-                                 reply_markup=starting_keybord())
+                                 reply_markup=starting_keyboard())
         except:
             if lang == 'eng':
                 bot.send_message(message.chat.id, 'Sorry I don`t get it. Write /help to check out what I can do.',
-                                 reply_markup=starting_keybord())
+                                 reply_markup=starting_keyboard())
             else:
                 bot.send_message(message.chat.id,
                                  'Извини, но я не понял. Напиши /help для того что-бы узнать, что я умею.',
-                                 reply_markup=starting_keybord())
+                                 reply_markup=starting_keyboard())
 
 
-def help_keybord():
+def help_keyboard():
     markup = types.ReplyKeyboardMarkup(one_time_keyboard=False, resize_keyboard=True)
     btn1 = types.KeyboardButton('20')
     btn2 = types.KeyboardButton('40')
@@ -252,7 +258,7 @@ def help_keybord():
     return markup
 
 
-def setings_keybord():
+def setings_keyboard():
     markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
     btn1 = types.KeyboardButton('/status')
     btn2 = types.KeyboardButton('/time')
@@ -264,7 +270,7 @@ def setings_keybord():
     return markup
 
 
-def starting_keybord():
+def starting_keyboard():
     markup = types.ReplyKeyboardMarkup(one_time_keyboard=False, resize_keyboard=True)
     btn1 = types.KeyboardButton('20')
     btn2 = types.KeyboardButton('40')
@@ -279,7 +285,7 @@ def starting_keybord():
     return markup
 
 
-def language_keybord():
+def language_keyboard():
     markup = types.ReplyKeyboardMarkup(one_time_keyboard=False, resize_keyboard=True)
     btn1 = types.KeyboardButton('Ru')
     btn2 = types.KeyboardButton('Eng')
@@ -311,6 +317,7 @@ def origin_ru_keyboard():
     return markup
 
 
+# Looking for a tickets in opened csv
 def tickets(data, origin):
     result = []
     data_len = len(data)
@@ -327,6 +334,7 @@ def tickets(data, origin):
     return result
 
 
+# Compare tickets into a message
 def compare_message(data, origin):
     result = ''
     for i in tickets(data, origin):
@@ -337,6 +345,7 @@ def compare_message(data, origin):
         return random.choice(emoji) + '\n' + result
 
 
+# Opening log files
 def status(file):
     log = open(file, 'r')
     log_list = [line for line in log]
@@ -349,15 +358,19 @@ def status(file):
     return mes
 
 
+# Read info from MongoDB
 def mongo(message):
     try:
+        # Try to read user data
         data = (mongodb.reader(message.chat.id))
         lang = data['language']
         return data
     except:
+        # If no user with this id, create new user with this id
         mongodb.writer(message.chat.id)
         data = {'id': message.chat.id, 'lang': 'eng', 'origin': 'Krakow'}
         return data
 
 
 bot.polling(none_stop=True, interval=0)
+
