@@ -117,13 +117,13 @@ def job(origin, interesting_cities):
                           columns=['data', 'origin', 'destinaton', 'price', 'transfers', 'airline', 'flight_number',
                                    'departure_at', 'return_at', 'expires_at'])
 
-        airline_code = pd.read_csv('airlines_codes.csv')
+        airline_code = pd.read_csv('csv_files/airlines_codes.csv')
 
         # Adding full name of airline
         df = df.merge(airline_code, left_on='airline', right_on='code', how='right')
         df.dropna(inplace=True)
 
-        city_code = pd.read_csv('cties_code.csv')
+        city_code = pd.read_csv('csv_files/cties_code.csv')
 
         # Adding full name of origin city
         df = df.merge(city_code, left_on='origin', right_on='citi code', how='right')
